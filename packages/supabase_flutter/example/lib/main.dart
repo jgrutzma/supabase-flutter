@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
-  await Supabase.initialize(url: 'SUPABASE_URL', anonKey: 'SUPABASE_ANON_KEY');
+  await Supabase.initialize(url: 'https://api.grutzmacher.es', anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey AgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE');
   runApp(const MyApp());
 }
 
@@ -66,6 +66,7 @@ class _LoginFormState extends State<_LoginForm> {
   bool _loading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -76,78 +77,146 @@ class _LoginFormState extends State<_LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return _loading
-        ? const Center(child: CircularProgressIndicator())
-        : ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+    return Center(
+      child: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          constraints: const BoxConstraints(maxWidth: 400),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 16,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 16),
+              Text(
+                'Bienvenido a tu app Supabase',
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Por favor, inicia sesión o regístrate para continuar.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
               TextFormField(
                 keyboardType: TextInputType.emailAddress,
                 controller: _emailController,
-                decoration: const InputDecoration(label: Text('Email')),
+                decoration: const InputDecoration(
+                  label: Text('Correo electrónico'),
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 obscureText: true,
                 controller: _passwordController,
-                decoration: const InputDecoration(label: Text('Password')),
+                decoration: const InputDecoration(
+                  label: Text('Contraseña'),
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock_outline),
+                ),
               ),
               const SizedBox(height: 16),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ElevatedButton(
-                onPressed: () async {
-                  setState(() {
-                    _loading = true;
-                  });
-                  final ScaffoldMessengerState scaffoldMessenger =
-                      ScaffoldMessenger.of(context);
-                  try {
-                    final email = _emailController.text;
-                    final password = _passwordController.text;
-                    await Supabase.instance.client.auth.signInWithPassword(
-                      email: email,
-                      password: password,
-                    );
-                  } catch (e) {
-                    scaffoldMessenger.showSnackBar(const SnackBar(
-                      content: Text('Login failed'),
-                      backgroundColor: Colors.red,
-                    ));
-                    setState(() {
-                      _loading = false;
-                    });
-                  }
-                },
-                child: const Text('Login'),
+                onPressed: _loading
+                    ? null
+                    : () async {
+                        setState(() {
+                          _loading = true;
+                          _errorMessage = null;
+                        });
+                        try {
+                          final email = _emailController.text;
+                          final password = _passwordController.text;
+                          await Supabase.instance.client.auth.signInWithPassword(
+                            email: email,
+                            password: password,
+                          );
+                        } catch (e) {
+                          setState(() {
+                            _errorMessage = 'Error al iniciar sesión. Verifica tus datos.';
+                          });
+                        }
+                        setState(() {
+                          _loading = false;
+                        });
+                      },
+                child: _loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Iniciar sesión'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: _loading
+                    ? null
+                    : () async {
+                        setState(() {
+                          _loading = true;
+                          _errorMessage = null;
+                        });
+                        try {
+                          final email = _emailController.text;
+                          final password = _passwordController.text;
+                          await Supabase.instance.client.auth.signUp(
+                            email: email,
+                            password: password,
+                          );
+                          setState(() {
+                            _errorMessage = 'Registro exitoso. Revisa tu correo para confirmar.';
+                          });
+                        } catch (e) {
+                          setState(() {
+                            _errorMessage = 'Error al registrarse. Intenta con otro correo.';
+                          });
+                        }
+                        setState(() {
+                          _loading = false;
+                        });
+                      },
+                child: const Text('Registrarse'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
               ),
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () async {
-                  setState(() {
-                    _loading = true;
-                  });
-                  final ScaffoldMessengerState scaffoldMessenger =
-                      ScaffoldMessenger.of(context);
-                  try {
-                    final email = _emailController.text;
-                    final password = _passwordController.text;
-                    await Supabase.instance.client.auth.signUp(
-                      email: email,
-                      password: password,
-                    );
-                  } catch (e) {
-                    scaffoldMessenger.showSnackBar(const SnackBar(
-                      content: Text('Signup failed'),
-                      backgroundColor: Colors.red,
-                    ));
-                    setState(() {
-                      _loading = false;
-                    });
-                  }
-                },
-                child: const Text('Signup'),
+              const Text(
+                'Tu correo debe ser válido. Si no tienes cuenta, regístrate y revisa tu correo para confirmar.',
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+                textAlign: TextAlign.center,
               ),
             ],
-          );
+          ),
+        ),
+      ),
+    );
   }
 }
 
