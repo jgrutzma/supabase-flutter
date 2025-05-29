@@ -1,0 +1,12 @@
+{
+  "name": "supabase-flutter-example-server",
+  "version": "1.0.0",
+  "description": "Servidor para la aplicación de ejemplo de Supabase Flutter",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+} 

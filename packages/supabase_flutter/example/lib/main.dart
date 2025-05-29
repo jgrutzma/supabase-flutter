@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-Future<void> main() async {
-  await Supabase.initialize(url: 'https://api.grutzmacher.es', anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey AgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE');
+void main() async {
+  const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE';
+  print('API KEY: >$key<');
+  print('API KEY length: ${key.length}');
+  await Supabase.initialize(
+    url: 'http://194.164.163.41:3000',
+    anonKey: key.trim(),
+  );
   runApp(const MyApp());
 }
 
@@ -149,7 +155,7 @@ class _LoginFormState extends State<_LoginForm> {
                         try {
                           final email = _emailController.text;
                           final password = _passwordController.text;
-                          await Supabase.instance.client.auth.signInWithPassword(
+                          final response = await Supabase.instance.client.auth.signInWithPassword(
                             email: email,
                             password: password,
                           );
@@ -185,7 +191,7 @@ class _LoginFormState extends State<_LoginForm> {
                         try {
                           final email = _emailController.text;
                           final password = _passwordController.text;
-                          await Supabase.instance.client.auth.signUp(
+                          final response = await Supabase.instance.client.auth.signUp(
                             email: email,
                             password: password,
                           );
